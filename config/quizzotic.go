@@ -8,7 +8,6 @@ import (
 var PORT = "8080"
 
 func InitializeConfig() {
-	//	LoadConfig from env using viper
 	viper.AutomaticEnv()
 
 	// Get PORT from env or use default if not set
