@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/labstack/echo/v4"
 	"quizzotic-backend/domain"
+	"strconv"
 )
 
 type quizzoticHandler struct {
@@ -18,13 +19,12 @@ func NewQuizzoticHandler(e *echo.Echo, quizzoticUsecase domain.QuizzoticUsecase)
 	e.GET("/healthCheck", handler.HealthCheck)
 
 	// TODO: Implement the following endpoints
-	////Quiz endpoints
-	//e.POST("/quiz", handler.CreateQuiz)
-	//e.GET("/quiz", handler.GetQuizzes)
-	//e.GET("/quiz/:id", handler.GetQuizByID)
-	//e.PUT("/quiz/:id", handler.UpdateQuiz)
-	//e.DELETE("/quiz/:id", handler.DeleteQuiz)
-	//
+	//Quiz endpoints
+	e.POST("/quiz", handler.CreateQuiz)
+	e.GET("/quiz", handler.GetQuizzes)
+	e.GET("/quiz/:id", handler.GetQuizByID)
+	e.PUT("/quiz/:id", handler.UpdateQuiz)
+
 	//// Question endpoints
 	//e.POST("/question", handler.CreateQuestion)
 	//e.GET("/question", handler.GetQuestions)
@@ -46,4 +46,68 @@ func (h *quizzoticHandler) HealthCheck(c echo.Context) error {
 
 	response["status"] = "Success"
 	return c.JSON(200, response)
+}
+
+// CreateQuiz is the handler for creating a new quiz
+func (h *quizzoticHandler) CreateQuiz(c echo.Context) error {
+	quiz := domain.Quiz{}
+	err := c.Bind(&quiz)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	err = h.quizzoticUsecase.CreateQuiz(&quiz)
+	if err != nil {
+		return c.JSON(500, err.Error())
+	}
+
+	return c.JSON(201, quiz)
+}
+
+// GetQuizzes is the handler for getting all quizzes
+func (h *quizzoticHandler) GetQuizzes(c echo.Context) error {
+	quizzes, err := h.quizzoticUsecase.GetQuizzes()
+	if err != nil {
+		return c.JSON(500, err.Error())
+	}
+
+	return c.JSON(200, quizzes)
+}
+
+// GetQuizByID is the handler for getting a quiz by ID
+func (h *quizzoticHandler) GetQuizByID(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	quiz, err := h.quizzoticUsecase.GetQuizByID(id)
+	if err != nil {
+		return c.JSON(500, err.Error())
+	}
+
+	return c.JSON(200, quiz)
+}
+
+// UpdateQuiz is the handler for updating a quiz
+func (h *quizzoticHandler) UpdateQuiz(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	quiz := domain.Quiz{}
+	err = c.Bind(&quiz)
+	if err != nil {
+		return c.JSON(400, err.Error())
+	}
+
+	err = h.quizzoticUsecase.UpdateQuiz(id, &quiz)
+	if err != nil {
+		return c.JSON(500, err.Error())
+	}
+
+	return c.JSON(200, quiz)
 }
