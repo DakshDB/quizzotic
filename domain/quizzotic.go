@@ -2,7 +2,7 @@ package domain
 
 type Choice struct {
 	ID         int    `json:"id"`
-	QuestionID int    `json:"question_id"`
+	QuestionID int    `json:"questionId"`
 	Text       string `json:"text"`
 }
 
@@ -12,10 +12,11 @@ func (Choice) TableName() string {
 
 type Question struct {
 	ID       int      `json:"id"`
-	Question string   `json:"Question"`
+	Question string   `json:"question"`
 	Choices  []Choice `json:"choices" gorm:"foreignKey:QuestionID"`
 	Answer   string   `json:"answer"`
-	QuizID   int      `json:"quiz_id"`
+	AnswerID int      `json:"answerId" gorm:"-"`
+	QuizID   int      `json:"quizId"`
 }
 
 func (Question) TableName() string {
@@ -27,8 +28,8 @@ type Quiz struct {
 	Name           string     `json:"name"`
 	Description    string     `json:"description" gorm:"-"`
 	Question       []Question `json:"questions" gorm:"foreignKey:QuizID"`
-	TotalQuestions int        `json:"total_questions"`
-	MaxTime        int        `json:"max_time"`
+	TotalQuestions int        `json:"totalQuestions"`
+	MaxTime        int        `json:"maxTime"`
 }
 
 func (Quiz) TableName() string {
