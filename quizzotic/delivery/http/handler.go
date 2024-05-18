@@ -1,9 +1,11 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4"
+	"net/http"
 	"quizzotic-backend/domain"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 type quizzoticHandler struct {
@@ -16,14 +18,18 @@ func NewQuizzoticHandler(e *echo.Echo, quizzoticUsecase domain.QuizzoticUsecase)
 	}
 
 	// Health check endpoint
-	e.GET("/healthCheck", handler.HealthCheck)
+	e.GET("/healthCheck", handler.HealthCheck, JWTMiddleware)
 
 	// TODO: Implement the following endpoints
 	//Quiz endpoints
-	e.POST("/quiz", handler.CreateQuiz)
-	e.GET("/quiz", handler.GetQuizzes)
-	e.GET("/quiz/:id", handler.GetQuizByID)
-	e.PUT("/quiz/:id", handler.UpdateQuiz)
+	e.POST("/quiz", handler.CreateQuiz, JWTMiddleware)
+	e.GET("/quiz", handler.GetQuizzes, JWTMiddleware)
+	e.GET("/quiz/:id", handler.GetQuizByID, JWTMiddleware)
+	e.PUT("/quiz/:id", handler.UpdateQuiz, JWTMiddleware)
+
+	//User apis
+	e.POST("/signup", handler.Signup)
+    e.POST("/login", handler.Login)
 
 	//// Question endpoints
 	//e.POST("/question", handler.CreateQuestion)
@@ -111,3 +117,43 @@ func (h *quizzoticHandler) UpdateQuiz(c echo.Context) error {
 
 	return c.JSON(200, quiz)
 }
+
+// Signup is the handler for user registration
+func (h *quizzoticHandler) Signup(c echo.Context) error {
+	var credentials struct {
+        Email    string `json:"email"`
+        Password string `json:"password"`
+		Name	 string `json:"name"`
+    }
+
+    if err := c.Bind(&credentials); err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+    }
+
+    token, err := h.quizzoticUsecase.Signup(credentials.Email, credentials.Password, credentials.Name)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+    }
+
+    return c.JSON(http.StatusCreated, map[string]string{"token": token})
+}
+
+// Login is the handler for user login
+func (h *quizzoticHandler) Login(c echo.Context) error {
+    var credentials struct {
+        Email    string `json:"email"`
+        Password string `json:"password"`
+    }
+
+    if err := c.Bind(&credentials); err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+    }
+
+    user, token, err := h.quizzoticUsecase.Login(credentials.Email, credentials.Password)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+    }
+
+    return c.JSON(http.StatusOK, map[string]interface{}{"token": token, "user": user})
+}
+
