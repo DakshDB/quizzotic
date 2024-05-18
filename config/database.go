@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 
 	"quizzotic-backend/domain"
@@ -22,6 +23,7 @@ func InitializeMysqlDB() (*gorm.DB, error) {
 	port := viper.GetString("DB_PORT")
 
 	DNS = user + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?charset=utf8&parseTime=True&loc=Local"
+	fmt.Println(DNS, "This is my server from viper")
 	db, err := gorm.Open(mysql.Open(DNS), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})

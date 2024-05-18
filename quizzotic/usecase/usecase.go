@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -95,7 +96,7 @@ func (u *quizzoticUsecase) GenerateJWT(user domain.User) (string, error) {
     claims["exp"] = time.Now().Add(time.Hour * 72).Unix() // Token expires after 72 hours
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    signedToken, err := token.SignedString([]byte("your_secret_key")) // Replace "your_secret_key" with a secure key
+    signedToken, err := token.SignedString([]byte(viper.GetString("JWT_SECRET"))) // Replace "your_secret_key" with a secure key
     if err != nil {
         return "", err
     }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"github.com/spf13/viper"
 )
 
 // JWTMiddleware checks for a valid JWT token in the request header
@@ -25,7 +26,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
             }
 
             // Use the same secret as when you created the token
-            return []byte("your_secret_key"), nil
+            return []byte(viper.GetString("JWT_SECRET")), nil
         })
 
         if err != nil || !token.Valid {
