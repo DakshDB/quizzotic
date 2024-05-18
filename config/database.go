@@ -1,7 +1,6 @@
 package config
 
 import (
-	_ "github.com/sijms/go-ora/v2"
 	"github.com/spf13/viper"
 )
 
