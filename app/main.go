@@ -1,14 +1,18 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"log"
 	"quizzotic-backend/config"
 	_handler "quizzotic-backend/quizzotic/delivery/http"
 	_repository "quizzotic-backend/quizzotic/repository"
 	_usecase "quizzotic-backend/quizzotic/usecase"
+
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/spf13/viper"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var (
@@ -16,6 +20,17 @@ var (
 )
 
 func init() {
+	if err := godotenv.Load(); err != nil {
+        log.Println("No .env file found")
+    }
+
+    // Initialize Viper
+    viper.AutomaticEnv() // Read environment variables
+    viper.SetConfigFile(".env") // Specify the .env file to Viper
+
+    if err := viper.ReadInConfig(); err != nil {
+        log.Printf("Error reading config file, %s", err)
+    }
 	e = echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
