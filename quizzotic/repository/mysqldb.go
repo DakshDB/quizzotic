@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"quizzotic-backend/domain"
 
 	"github.com/google/uuid"
@@ -50,39 +49,37 @@ func (repo *mysqlDBQuizzoticRepository) GetQuizByID(id int) (quiz domain.Quiz, e
 }
 
 // UpdateQuiz will update a quiz by its ID
-func (repo *mysqlDBQuizzoticRepository) UpdateQuiz(id int, quiz *domain.Quiz) error {
+func (repo *mysqlDBQuizzoticRepository) UpdateQuiz(_ int, quiz *domain.Quiz) error {
 	return repo.DB.Save(quiz).Error
 }
 
 // Create inserts a new user into the database
 func (repo *mysqlDBQuizzoticRepository) CreateUser(email string, password string, name string) (domain.User, error) {
-	fmt.Println("Creating user")
-    newUser := domain.User{
-        ID:       uuid.New(), // Generate a new UUID
-        Name:     name,
-        Email:    email,
-        Password: password, // Use the hashed password
-        Verified: false, // Default to false unless you have an email verification system in place
-    }
+	newUser := domain.User{
+		ID:       uuid.New(), // Generate a new UUID
+		Name:     name,
+		Email:    email,
+		Password: password, // Use the hashed password
+		Verified: false,    // Default to false unless you have an email verification system in place
+	}
 	// Use GORM's Create method to add the new user to the database
-	fmt.Println("New User", newUser)
-    result := repo.DB.Create(&newUser)
-    if result.Error != nil {
-        return domain.User{}, result.Error  // Return an empty User object and the error
-    }
+	result := repo.DB.Create(&newUser)
+	if result.Error != nil {
+		return domain.User{}, result.Error // Return an empty User object and the error
+	}
 
-    return newUser, nil // Return the newly created user and nil error
+	return newUser, nil // Return the newly created user and nil error
 }
 
 // FindByEmail retrieves a user by their email
 func (repo *mysqlDBQuizzoticRepository) FindUserByEmail(email string) (domain.User, error) {
-    var user domain.User
-    result := repo.DB.Where("email = ?", email).First(&user)
-    return user, result.Error
+	var user domain.User
+	result := repo.DB.Where("email = ?", email).First(&user)
+	return user, result.Error
 }
 
 // Update modifies an existing user record
 func (repo *mysqlDBQuizzoticRepository) UpdateUser(user domain.User) error {
-    result := repo.DB.Save(&user)
-    return result.Error
+	result := repo.DB.Save(&user)
+	return result.Error
 }
